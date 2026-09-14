@@ -33,7 +33,7 @@ export async function adminLogin(prevState: { error: string }, formData: FormDat
       return { error: "Invalid admin password." }
     }
 
-    // Ensure admin user exists in DB with role ADMIN
+    // Ensure admin user exists in DB with role ADMIN and synced password
     if (!adminUser) {
       const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10)
       adminUser = await db.user.create({
@@ -45,10 +45,14 @@ export async function adminLogin(prevState: { error: string }, formData: FormDat
           title: "System Administrator",
         },
       })
-    } else if (adminUser.role !== "ADMIN") {
+    } else {
+      const updateData: { role: "ADMIN"; password?: string } = { role: "ADMIN" }
+      if (!isDbMatch && isHardcodedMatch) {
+        updateData.password = await bcrypt.hash(ADMIN_PASSWORD, 10)
+      }
       await db.user.update({
         where: { id: adminUser.id },
-        data: { role: "ADMIN" },
+        data: updateData,
       })
     }
 
