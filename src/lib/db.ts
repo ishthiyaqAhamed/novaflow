@@ -4,7 +4,9 @@ import { PrismaPg } from "@prisma/adapter-pg"
 
 function getClient(): PrismaClient {
   const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString:
+      process.env.DATABASE_URL ||
+      "postgres://placeholder:placeholder@db.prisma.io:5432/postgres?sslmode=require",
   })
   return new PrismaClient({ adapter })
 }
