@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/session"
 import { db } from "@/lib/db"
 import { AppSidebar } from "@/components/layout/AppSidebar"
+import { AiChatbot } from "@/components/ai/AiChatbot"
 import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
@@ -49,8 +50,9 @@ export default async function AppLayout({
         activeDealsCount={activeDealsCount}
         pendingTasksCount={pendingTasksCount}
       />
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden relative">
         {children}
+        <AiChatbot />
       </div>
     </div>
   )
