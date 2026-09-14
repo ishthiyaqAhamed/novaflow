@@ -10,6 +10,46 @@ export interface SessionUser {
   role: string
   title?: string | null
   avatarUrl?: string | null
+  workspaceId: string
+  workspaceName: string
+  workspaceRole: string
+}
+
+export async function ensureUserWorkspace(userId: string, userName: string) {
+  const membership = await db.workspaceMember.findFirst({
+    where: { userId },
+    include: { workspace: true },
+    orderBy: { createdAt: "asc" },
+  })
+
+  if (membership) {
+    return {
+      workspaceId: membership.workspaceId,
+      workspaceName: membership.workspace.name,
+      workspaceRole: membership.role,
+    }
+  }
+
+  // Create default workspace for user
+  const slug = `ws-${userId.slice(-6)}-${Date.now().toString(36)}`
+  const workspace = await db.workspace.create({
+    data: {
+      name: `${userName}'s Workspace`,
+      slug,
+      members: {
+        create: {
+          userId,
+          role: "OWNER",
+        },
+      },
+    },
+  })
+
+  return {
+    workspaceId: workspace.id,
+    workspaceName: workspace.name,
+    workspaceRole: "OWNER",
+  }
 }
 
 export async function setSession(userId: string) {
@@ -34,19 +74,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     const userId = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
     if (!userId) {
-      // Fallback: default to the first active user for smooth previewing
-      const firstUser = await db.user.findFirst({
-        orderBy: { createdAt: "asc" },
-      })
-      if (!firstUser) return null
-      return {
-        id: firstUser.id,
-        name: firstUser.name,
-        email: firstUser.email,
-        role: (firstUser as any).role || "ADMIN",
-        title: (firstUser as any).title || null,
-        avatarUrl: (firstUser as any).avatarUrl || null,
-      }
+      return null
     }
 
     const user = await db.user.findUnique({
@@ -55,13 +83,18 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 
     if (!user) return null
 
+    const ws = await ensureUserWorkspace(user.id, user.name)
+
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: (user as any).role || "ADMIN",
+      role: (user as any).role || "MEMBER",
       title: (user as any).title || null,
       avatarUrl: (user as any).avatarUrl || null,
+      workspaceId: ws.workspaceId,
+      workspaceName: ws.workspaceName,
+      workspaceRole: ws.workspaceRole,
     }
   } catch (err: any) {
     if (err?.digest === "DYNAMIC_SERVER_USAGE" || err?.message?.includes("Dynamic server usage")) {

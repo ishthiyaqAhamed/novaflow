@@ -29,6 +29,7 @@ export async function createCompany(formData: FormData) {
       website: website || (domain ? `https://${domain}` : undefined),
       annualRevenue,
       ownerId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -39,6 +40,7 @@ export async function createCompany(formData: FormData) {
       relatedType: "COMPANY",
       relatedId: company.id,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -48,10 +50,10 @@ export async function createCompany(formData: FormData) {
 }
 
 export async function deleteCompany(companyId: string) {
-  await requireUser()
+  const user = await requireUser()
 
-  await db.company.delete({
-    where: { id: companyId },
+  await db.company.deleteMany({
+    where: { id: companyId, workspaceId: user.workspaceId },
   })
 
   revalidatePath("/companies")

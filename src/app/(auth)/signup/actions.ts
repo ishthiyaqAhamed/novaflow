@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { createOtpForUser } from "@/lib/otp"
 import { sendOtpEmail } from "@/lib/email"
+import { isSystemAdminEmail } from "@/lib/admin"
 import bcrypt from "bcryptjs"
 import { redirect } from "next/navigation"
 
@@ -20,6 +21,10 @@ export async function signup(prevState: { error: string }, formData: FormData) {
       return { error: "Password must be at least 8 characters" }
     }
 
+    if (isSystemAdminEmail(email)) {
+      return { error: "This email address is reserved for system administration." }
+    }
+
     const existing = await db.user.findUnique({ where: { email } })
     if (existing) {
       return { error: "An account with this email already exists. Please sign in." }
@@ -27,11 +32,30 @@ export async function signup(prevState: { error: string }, formData: FormData) {
 
     const hashed = await bcrypt.hash(password, 10)
 
-    const totalUsers = await db.user.count()
-    const role = totalUsers === 0 ? "ADMIN" : "MEMBER"
-
+    // Regular users are always created with role MEMBER
     const user = await db.user.create({
-      data: { name, email, password: hashed, role },
+      data: {
+        name,
+        email,
+        password: hashed,
+        role: "MEMBER",
+        title: "Workspace Owner",
+      },
+    })
+
+    // Immediately provision a fresh, dedicated workspace for the new user
+    const slug = `ws-${user.id.slice(-6)}-${Date.now().toString(36)}`
+    await db.workspace.create({
+      data: {
+        name: `${name}'s Workspace`,
+        slug,
+        members: {
+          create: {
+            userId: user.id,
+            role: "OWNER",
+          },
+        },
+      },
     })
 
     const code = await createOtpForUser(user.id)

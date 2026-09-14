@@ -11,6 +11,7 @@ const initialState = { error: "" }
 function LoginForm() {
   const searchParams = useSearchParams()
   const isVerified = searchParams.get("verified") === "true"
+  const isReset = searchParams.get("reset") === "true"
   const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
@@ -38,6 +39,17 @@ function LoginForm() {
         </div>
       )}
 
+      {/* Password Reset Success Banner */}
+      {isReset && (
+        <div className="mb-6 p-3.5 rounded-xl border border-signal/30 bg-signal/5 flex items-start gap-2.5 text-xs text-signal">
+          <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+          <div>
+            <div className="font-bold">Password reset successfully!</div>
+            <div className="text-[11px] text-muted mt-0.5">Please sign in with your new password below.</div>
+          </div>
+        </div>
+      )}
+
       {/* Form */}
       <form action={formAction} className="space-y-4">
         <div>
@@ -59,6 +71,12 @@ function LoginForm() {
             <label className="block text-xs font-medium text-ink" htmlFor="password">
               Password
             </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-accent hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
           <input
             id="password"
@@ -91,6 +109,12 @@ function LoginForm() {
           Create account
         </Link>
       </p>
+
+      <div className="pt-4 mt-6 border-t border-border/60 text-center">
+        <Link href="/admin/login" className="text-[11px] text-muted hover:text-accent transition-colors font-medium">
+          System Administrator Portal →
+        </Link>
+      </div>
     </div>
   )
 }

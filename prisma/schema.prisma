@@ -11,18 +11,19 @@ datasource db {
 }
 
 model User {
-  id                String        @id @default(cuid())
+  id                String            @id @default(cuid())
   name              String
-  email             String        @unique
+  email             String            @unique
   password          String
-  role              String        @default("ADMIN")
+  role              String            @default("MEMBER") // SaaS global role: ADMIN or MEMBER
   avatarUrl         String?
   phone             String?
-  title             String?       @default("Sales Executive")
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  title             String?           @default("Sales Executive")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   otpCodes          OtpCode[]
+  workspaceMembers  WorkspaceMember[]
   companies         Company[]
   contacts          Contact[]
   deals             Deal[]
@@ -30,41 +31,78 @@ model User {
   activityLogs      ActivityLog[]
 }
 
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  plan        String            @default("FREE")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  members     WorkspaceMember[]
+  companies   Company[]
+  contacts    Contact[]
+  deals       Deal[]
+  tasks       Task[]
+  activityLogs ActivityLog[]
+}
+
+model WorkspaceMember {
+  id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String     @default("OWNER") // OWNER, ADMIN, MEMBER
+  createdAt   DateTime   @default(now())
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+}
+
 model OtpCode {
   id         String    @id @default(cuid())
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   code       String
+  purpose    String    @default("VERIFICATION") // VERIFICATION, PASSWORD_RESET
   expiresAt  DateTime
   consumedAt DateTime?
   createdAt  DateTime  @default(now())
 
   @@index([userId])
+  @@index([purpose])
 }
 
 model Company {
-  id          String     @id @default(cuid())
-  name        String
-  domain      String?
-  industry    String?    @default("Technology")
-  size        String?    @default("50-200")
-  phone       String?
-  address     String?
-  website     String?
-  annualRevenue Float?   @default(0)
-  ownerId     String
-  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id            String     @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name          String
+  domain        String?
+  industry      String?    @default("Technology")
+  size          String?    @default("50-200")
+  phone         String?
+  address       String?
+  website       String?
+  annualRevenue Float?     @default(0)
+  ownerId       String
+  owner         User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  contacts    Contact[]
-  deals       Deal[]
+  contacts      Contact[]
+  deals         Deal[]
 
+  @@index([workspaceId])
   @@index([ownerId])
 }
 
 model Contact {
   id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   name        String
   email       String
   phone       String?
@@ -81,12 +119,15 @@ model Contact {
   deals       Deal[]
   tasks       Task[]
 
+  @@index([workspaceId])
   @@index([ownerId])
   @@index([companyId])
 }
 
 model Deal {
   id                String     @id @default(cuid())
+  workspaceId       String
+  workspace         Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   title             String
   value             Float      @default(0)
   stage             String     @default("LEAD") // LEAD, QUALIFIED, DEMO, PROPOSAL, NEGOTIATION, WON, LOST
@@ -103,6 +144,7 @@ model Deal {
 
   tasks             Task[]
 
+  @@index([workspaceId])
   @@index([ownerId])
   @@index([companyId])
   @@index([contactId])
@@ -111,6 +153,8 @@ model Deal {
 
 model Task {
   id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   title       String
   description String?
   dueDate     DateTime?
@@ -125,6 +169,7 @@ model Task {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  @@index([workspaceId])
   @@index([ownerId])
   @@index([dealId])
   @@index([contactId])
@@ -132,6 +177,8 @@ model Task {
 
 model ActivityLog {
   id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   type        String     @default("NOTE") // NOTE, CALL, MEETING, EMAIL, STAGE_CHANGE
   note        String
   relatedType String?    // DEAL, CONTACT, COMPANY, TASK
@@ -140,6 +187,7 @@ model ActivityLog {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 
+  @@index([workspaceId])
   @@index([userId])
   @@index([relatedType, relatedId])
 }

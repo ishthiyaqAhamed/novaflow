@@ -28,6 +28,7 @@ export async function createTask(formData: FormData) {
       dealId: dealId || undefined,
       contactId: contactId || undefined,
       ownerId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -38,6 +39,7 @@ export async function createTask(formData: FormData) {
       relatedType: "TASK",
       relatedId: task.id,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -51,7 +53,13 @@ export async function toggleTaskStatus(taskId: string, currentStatus: string) {
 
   const newStatus = currentStatus === "DONE" ? "TODO" : "DONE"
 
-  const task = await db.task.update({
+  const task = await db.task.findFirst({
+    where: { id: taskId, workspaceId: user.workspaceId },
+  })
+
+  if (!task) throw new Error("Task not found in this workspace")
+
+  const updatedTask = await db.task.update({
     where: { id: taskId },
     data: { status: newStatus },
   })
@@ -60,10 +68,11 @@ export async function toggleTaskStatus(taskId: string, currentStatus: string) {
     await db.activityLog.create({
       data: {
         type: "NOTE",
-        note: `Completed task "${task.title}"`,
+        note: `Completed task "${updatedTask.title}"`,
         relatedType: "TASK",
-        relatedId: task.id,
+        relatedId: updatedTask.id,
         userId: user.id,
+        workspaceId: user.workspaceId,
       },
     })
   }
@@ -74,10 +83,10 @@ export async function toggleTaskStatus(taskId: string, currentStatus: string) {
 }
 
 export async function deleteTask(taskId: string) {
-  await requireUser()
+  const user = await requireUser()
 
-  await db.task.delete({
-    where: { id: taskId },
+  await db.task.deleteMany({
+    where: { id: taskId, workspaceId: user.workspaceId },
   })
 
   revalidatePath("/tasks")

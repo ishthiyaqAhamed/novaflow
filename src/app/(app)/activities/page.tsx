@@ -1,9 +1,14 @@
 import { db } from "@/lib/db"
+import { getCurrentUser } from "@/lib/session"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { ActivitiesClient } from "./activities-client"
 
 export default async function ActivitiesPage() {
+  const user = await getCurrentUser()
+  const workspaceId = user?.workspaceId || ""
+
   const activities = await db.activityLog.findMany({
+    where: { workspaceId },
     include: {
       user: { select: { name: true, avatarUrl: true } },
     },

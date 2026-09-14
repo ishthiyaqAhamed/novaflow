@@ -45,9 +45,11 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
             <span className="h-8 w-8 rounded-lg bg-ink text-paper flex items-center justify-center font-display font-bold text-base shadow-xs">
               N
             </span>
-            <div className="flex flex-col">
-              <span className="font-display font-bold text-base text-ink tracking-tight">NovaFlow</span>
-              <span className="text-[10px] text-muted font-mono font-medium -mt-1">WORKSPACE</span>
+            <div className="flex flex-col max-w-[170px]">
+              <span className="font-display font-bold text-base text-ink tracking-tight truncate">NovaFlow</span>
+              <span className="text-[10px] text-muted font-mono font-medium -mt-1 truncate uppercase">
+                {user?.workspaceName || "WORKSPACE"}
+              </span>
             </div>
           </Link>
         </div>
@@ -87,20 +89,18 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
             )
           })}
 
-          {user?.role === "ADMIN" && (
-            <div className="pt-3 mt-3 border-t border-border/60">
-              <Link
-                href="/admin"
-                className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  <span>Admin Portal</span>
-                </div>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          )}
+          <div className="pt-3 mt-3 border-t border-border/60">
+            <Link
+              href="/admin/login"
+              className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-3.5 w-3.5" />
+                <span>Admin Portal</span>
+              </div>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </nav>
       </div>
 

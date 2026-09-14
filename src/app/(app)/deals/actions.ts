@@ -29,6 +29,7 @@ export async function createDeal(formData: FormData) {
       contactId: contactId || undefined,
       expectedCloseDate: expectedCloseDateStr ? new Date(expectedCloseDateStr) : undefined,
       ownerId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -40,6 +41,7 @@ export async function createDeal(formData: FormData) {
       relatedType: "DEAL",
       relatedId: deal.id,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -51,11 +53,11 @@ export async function createDeal(formData: FormData) {
 export async function updateDealStage(dealId: string, newStage: string) {
   const user = await requireUser()
 
-  const deal = await db.deal.findUnique({
-    where: { id: dealId },
+  const deal = await db.deal.findFirst({
+    where: { id: dealId, workspaceId: user.workspaceId },
   })
 
-  if (!deal) throw new Error("Deal not found")
+  if (!deal) throw new Error("Deal not found in this workspace")
 
   const probability = newStage === "WON" ? 100 : newStage === "LOST" ? 0 : newStage === "NEGOTIATION" ? 90 : newStage === "PROPOSAL" ? 75 : newStage === "DEMO" ? 50 : 25
 
@@ -71,6 +73,7 @@ export async function updateDealStage(dealId: string, newStage: string) {
       relatedType: "DEAL",
       relatedId: deal.id,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -80,10 +83,10 @@ export async function updateDealStage(dealId: string, newStage: string) {
 }
 
 export async function deleteDeal(dealId: string) {
-  await requireUser()
+  const user = await requireUser()
 
-  await db.deal.delete({
-    where: { id: dealId },
+  await db.deal.deleteMany({
+    where: { id: dealId, workspaceId: user.workspaceId },
   })
 
   revalidatePath("/deals")

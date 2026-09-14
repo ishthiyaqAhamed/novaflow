@@ -23,6 +23,7 @@ export async function createActivity(formData: FormData) {
       relatedType: relatedType || undefined,
       relatedId: relatedId || undefined,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 

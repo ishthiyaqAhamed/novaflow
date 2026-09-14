@@ -1,9 +1,14 @@
 import { db } from "@/lib/db"
+import { getCurrentUser } from "@/lib/session"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { CompaniesClient } from "./companies-client"
 
 export default async function CompaniesPage() {
+  const user = await getCurrentUser()
+  const workspaceId = user?.workspaceId || ""
+
   const companies = await db.company.findMany({
+    where: { workspaceId },
     include: {
       contacts: { select: { id: true, name: true } },
       deals: { select: { id: true, title: true, value: true, stage: true } },

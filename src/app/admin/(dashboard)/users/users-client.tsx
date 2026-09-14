@@ -11,8 +11,9 @@ import {
   Mail,
   CheckCircle2,
   Clock,
+  ShieldAlert,
 } from "lucide-react"
-import { updateUserRole, deleteUser, adminCreateUser } from "./actions"
+import { deleteUser, adminCreateUser } from "./actions"
 
 interface UserItem {
   id: string
@@ -46,17 +47,12 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
     return matchesSearch && matchesRole
   })
 
-  const handleRoleChange = (userId: string, newRole: string) => {
-    setUsers(prev =>
-      prev.map(u => (u.id === userId ? { ...u, role: newRole } : u))
-    )
-    startTransition(async () => {
-      await updateUserRole(userId, newRole)
-    })
-  }
-
-  const handleDelete = (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user? This will also remove their associated data.")) return
+  const handleDelete = (userId: string, email: string) => {
+    if (email.toLowerCase().includes("admin@")) {
+      alert("The Super Admin account cannot be deleted.")
+      return
+    }
+    if (!confirm("Are you sure you want to delete this user and their workspace data?")) return
     setUsers(prev => prev.filter(u => u.id !== userId))
     startTransition(async () => {
       await deleteUser(userId)
@@ -84,9 +80,9 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
             onChange={e => setRoleFilter(e.target.value)}
             className="text-xs rounded-lg border border-border bg-paper px-3 py-1.5 text-muted focus:outline-none focus:border-accent"
           >
-            <option value="ALL">All Roles</option>
-            <option value="ADMIN">Admin</option>
-            <option value="MEMBER">Member</option>
+            <option value="ALL">All Accounts</option>
+            <option value="ADMIN">Super Admin</option>
+            <option value="MEMBER">SaaS Users</option>
           </select>
         </div>
 
@@ -95,7 +91,7 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
           className="bg-ink hover:bg-accent text-paper text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-xs flex items-center gap-1.5"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Add User</span>
+          <span>Add SaaS User</span>
         </button>
       </div>
 
@@ -106,59 +102,75 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
             <thead className="border-b border-border bg-ink/[0.01]">
               <tr className="text-muted font-medium">
                 <th className="py-3 px-4 font-semibold">User</th>
-                <th className="py-3 px-4 font-semibold">Role</th>
+                <th className="py-3 px-4 font-semibold">Account Type</th>
                 <th className="py-3 px-4 font-semibold">OTP Activity</th>
-                <th className="py-3 px-4 font-semibold">Joined Date</th>
+                <th className="py-3 px-4 font-semibold">Registration Date</th>
                 <th className="py-3 px-4 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {filteredUsers.map(u => (
-                <tr key={u.id} className="hover:bg-ink/[0.01] transition-colors">
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-full bg-accent/15 text-accent font-bold text-xs flex items-center justify-center shrink-0">
-                        {u.name.slice(0, 1)}
+              {filteredUsers.map(u => {
+                const isAdmin = u.role === "ADMIN"
+
+                return (
+                  <tr key={u.id} className="hover:bg-ink/[0.01] transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`h-8 w-8 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${
+                          isAdmin ? "bg-purple-500/20 text-purple-700" : "bg-accent/15 text-accent"
+                        }`}>
+                          {u.name.slice(0, 1)}
+                        </div>
+                        <div>
+                          <div className="font-bold text-ink text-xs flex items-center gap-1.5">
+                            <span>{u.name}</span>
+                            {isAdmin && (
+                              <span className="text-[9px] bg-purple-100 text-purple-800 font-mono px-1.5 py-0.2 rounded font-bold">
+                                SYSTEM
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-muted font-mono">{u.email}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-ink text-xs">{u.name}</div>
-                        <div className="text-[10px] text-muted font-mono">{u.email}</div>
-                      </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className="py-3.5 px-4">
-                    <select
-                      value={u.role}
-                      onChange={e => handleRoleChange(u.id, e.target.value)}
-                      className="bg-paper border border-border rounded-lg px-2 py-1 text-xs font-mono font-bold text-ink focus:outline-none focus:border-accent"
-                    >
-                      <option value="ADMIN">ADMIN</option>
-                      <option value="MEMBER">MEMBER</option>
-                    </select>
-                  </td>
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                          isAdmin
+                            ? "bg-purple-500/10 text-purple-700 border border-purple-500/20"
+                            : "bg-ink/5 text-muted border border-border"
+                        }`}
+                      >
+                        {isAdmin ? "SUPER ADMIN" : "USER (MEMBER)"}
+                      </span>
+                    </td>
 
-                  <td className="py-3.5 px-4">
-                    <span className="font-mono text-xs text-muted">
-                      {u._count.otpCodes} OTP{u._count.otpCodes !== 1 ? "s" : ""} generated
-                    </span>
-                  </td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono text-xs text-muted">
+                        {u._count.otpCodes} OTP{u._count.otpCodes !== 1 ? "s" : ""} generated
+                      </span>
+                    </td>
 
-                  <td className="py-3.5 px-4 text-muted font-mono">
-                    {new Date(u.createdAt).toLocaleDateString()}
-                  </td>
+                    <td className="py-3.5 px-4 text-muted font-mono">
+                      {new Date(u.createdAt).toLocaleDateString()}
+                    </td>
 
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => handleDelete(u.id)}
-                      className="text-muted hover:text-alert p-1 transition-colors"
-                      title="Delete user"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    <td className="py-3.5 px-4 text-right">
+                      {!isAdmin && (
+                        <button
+                          onClick={() => handleDelete(u.id, u.email)}
+                          className="text-muted hover:text-alert p-1 transition-colors"
+                          title="Delete user"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -169,7 +181,7 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-xs p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-paper p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-ink">Create New User</h2>
+              <h2 className="text-base font-bold text-ink">Provision SaaS User</h2>
               <button onClick={() => setShowModal(false)} className="text-muted hover:text-ink">
                 <X className="h-4 w-4" />
               </button>
@@ -204,27 +216,13 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-muted font-medium mb-1">Role</label>
-                  <select
-                    name="role"
-                    defaultValue="MEMBER"
-                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="MEMBER">MEMBER</option>
-                    <option value="ADMIN">ADMIN</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-muted font-medium mb-1">Password</label>
-                  <input
-                    name="password"
-                    defaultValue="NovaFlow2026!"
-                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs font-mono focus:outline-none focus:border-accent"
-                  />
-                </div>
+              <div>
+                <label className="block text-muted font-medium mb-1">Initial Password</label>
+                <input
+                  name="password"
+                  defaultValue="NovaFlow2026!"
+                  className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs font-mono focus:outline-none focus:border-accent"
+                />
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
@@ -239,7 +237,7 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
                   type="submit"
                   className="bg-ink hover:bg-accent text-paper font-semibold px-4 py-2 rounded-lg transition-colors shadow-xs"
                 >
-                  Create User
+                  Create SaaS Account
                 </button>
               </div>
             </form>

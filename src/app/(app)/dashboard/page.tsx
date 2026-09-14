@@ -5,19 +5,14 @@ import Link from "next/link"
 import {
   DollarSign,
   TrendingUp,
-  Kanban,
-  CheckCircle2,
-  Clock,
-  ArrowUpRight,
   Building,
-  User,
   AlertCircle,
-  Plus,
-  Sparkles,
+  ArrowUpRight,
 } from "lucide-react"
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
+  const workspaceId = user?.workspaceId || ""
 
   const [
     allDeals,
@@ -27,6 +22,7 @@ export default async function DashboardPage() {
     recentActivities,
   ] = await Promise.all([
     db.deal.findMany({
+      where: { workspaceId },
       include: {
         company: true,
         contact: true,
@@ -34,15 +30,17 @@ export default async function DashboardPage() {
       orderBy: { value: "desc" },
     }),
     db.company.findMany({
+      where: { workspaceId },
       take: 5,
       orderBy: { createdAt: "desc" },
     }),
     db.contact.findMany({
+      where: { workspaceId },
       take: 5,
       orderBy: { createdAt: "desc" },
     }),
     db.task.findMany({
-      where: { status: { not: "DONE" } },
+      where: { workspaceId, status: { not: "DONE" } },
       include: {
         deal: true,
         contact: true,
@@ -51,6 +49,7 @@ export default async function DashboardPage() {
       take: 5,
     }),
     db.activityLog.findMany({
+      where: { workspaceId },
       take: 6,
       orderBy: { createdAt: "desc" },
       include: {

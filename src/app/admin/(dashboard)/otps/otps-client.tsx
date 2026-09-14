@@ -133,17 +133,24 @@ export function AdminOtpsClient({ initialOtps }: { initialOtps: OtpItem[] }) {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                            isConsumed
-                              ? "bg-signal/10 text-signal"
-                              : isExpired
-                              ? "bg-alert/10 text-alert"
-                              : "bg-accent/10 text-accent animate-pulse"
-                          }`}
-                        >
-                          {isConsumed ? "Consumed" : isExpired ? "Expired" : "Active (Valid)"}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                              isConsumed
+                                ? "bg-signal/10 text-signal"
+                                : isExpired
+                                ? "bg-alert/10 text-alert"
+                                : "bg-accent/10 text-accent animate-pulse"
+                            }`}
+                          >
+                            {isConsumed ? "Consumed" : isExpired ? "Expired" : "Active (Valid)"}
+                          </span>
+                          {(otp as any).purpose && (
+                            <span className="px-1.5 py-0.2 text-[9px] font-mono text-muted bg-ink/5 rounded">
+                              {(otp as any).purpose}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-4 font-mono text-muted text-[11px]">

@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { setSession } from "@/lib/session"
+import { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME, isSystemAdminEmail } from "@/lib/admin"
 import bcrypt from "bcryptjs"
 import { redirect } from "next/navigation"
 
@@ -14,6 +15,46 @@ export async function login(prevState: { error: string }, formData: FormData) {
       return { error: "Email and password are required" }
     }
 
+    // Check if logging in as the single hardcoded super admin
+    if (isSystemAdminEmail(email)) {
+      let adminUser = await db.user.findUnique({
+        where: { email: ADMIN_EMAIL },
+      })
+
+      const isHardcodedMatch = password === ADMIN_PASSWORD
+      let isDbMatch = false
+      if (adminUser) {
+        isDbMatch = await bcrypt.compare(password, adminUser.password).catch(() => false)
+      }
+
+      if (!isHardcodedMatch && !isDbMatch) {
+        return { error: "Incorrect admin password" }
+      }
+
+      // Ensure admin user exists in DB with role ADMIN
+      if (!adminUser) {
+        const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10)
+        adminUser = await db.user.create({
+          data: {
+            name: ADMIN_NAME,
+            email: ADMIN_EMAIL,
+            password: hashedPassword,
+            role: "ADMIN",
+            title: "System Administrator",
+          },
+        })
+      } else if (adminUser.role !== "ADMIN") {
+        await db.user.update({
+          where: { id: adminUser.id },
+          data: { role: "ADMIN" },
+        })
+      }
+
+      await setSession(adminUser.id)
+      redirect("/admin")
+    }
+
+    // Regular SaaS user login
     const user = await db.user.findUnique({
       where: { email },
     })
@@ -28,12 +69,7 @@ export async function login(prevState: { error: string }, formData: FormData) {
     }
 
     await setSession(user.id)
-
-    if ((user as any).role === "ADMIN") {
-      redirect("/admin")
-    } else {
-      redirect("/dashboard")
-    }
+    redirect("/dashboard")
   } catch (error: any) {
     if (error?.message === "NEXT_REDIRECT" || error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error

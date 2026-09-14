@@ -27,6 +27,7 @@ export async function createContact(formData: FormData) {
       status,
       companyId: companyId || undefined,
       ownerId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -37,6 +38,7 @@ export async function createContact(formData: FormData) {
       relatedType: "CONTACT",
       relatedId: contact.id,
       userId: user.id,
+      workspaceId: user.workspaceId,
     },
   })
 
@@ -46,10 +48,10 @@ export async function createContact(formData: FormData) {
 }
 
 export async function deleteContact(contactId: string) {
-  await requireUser()
+  const user = await requireUser()
 
-  await db.contact.delete({
-    where: { id: contactId },
+  await db.contact.deleteMany({
+    where: { id: contactId, workspaceId: user.workspaceId },
   })
 
   revalidatePath("/contacts")

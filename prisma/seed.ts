@@ -12,11 +12,13 @@ async function main() {
   await db.contact.deleteMany();
   await db.company.deleteMany();
   await db.otpCode.deleteMany();
+  await db.workspaceMember.deleteMany();
+  await db.workspace.deleteMany();
   await db.user.deleteMany();
 
   const hashedPassword = await bcrypt.hash("NovaFlow2026!", 10);
 
-  // 1. Create Demo User
+  // 1. Create Demo Users
   const demoUser = await db.user.create({
     data: {
       name: "Alex Morgan",
@@ -41,7 +43,21 @@ async function main() {
     },
   });
 
-  // 2. Create Companies
+  // 2. Create Workspace
+  const workspace = await db.workspace.create({
+    data: {
+      name: "Acme Global HQ",
+      slug: "acme-global-hq",
+      members: {
+        create: [
+          { userId: demoUser.id, role: "OWNER" },
+          { userId: memberUser.id, role: "MEMBER" },
+        ],
+      },
+    },
+  });
+
+  // 3. Create Companies
   const stripe = await db.company.create({
     data: {
       name: "Stripe",
@@ -53,6 +69,7 @@ async function main() {
       website: "https://stripe.com",
       annualRevenue: 14000000000,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -67,6 +84,7 @@ async function main() {
       website: "https://linear.app",
       annualRevenue: 45000000,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -81,6 +99,7 @@ async function main() {
       website: "https://vercel.com",
       annualRevenue: 150000000,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -95,6 +114,7 @@ async function main() {
       website: "https://figma.com",
       annualRevenue: 600000000,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -109,10 +129,11 @@ async function main() {
       website: "https://supabase.com",
       annualRevenue: 30000000,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
-  // 3. Create Contacts
+  // 4. Create Contacts
   const patrick = await db.contact.create({
     data: {
       name: "Patrick Collison",
@@ -123,6 +144,7 @@ async function main() {
       avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       companyId: stripe.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -136,6 +158,7 @@ async function main() {
       avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
       companyId: linear.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -149,6 +172,7 @@ async function main() {
       avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
       companyId: vercel.id,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -162,6 +186,7 @@ async function main() {
       avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
       companyId: figma.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -175,10 +200,11 @@ async function main() {
       avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80",
       companyId: supabase.id,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
-  // 4. Create Deals across Kanban Stages
+  // 5. Create Deals across Kanban Stages
   const deal1 = await db.deal.create({
     data: {
       title: "Global Enterprise Billing Integration",
@@ -189,6 +215,7 @@ async function main() {
       companyId: stripe.id,
       contactId: patrick.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -202,6 +229,7 @@ async function main() {
       companyId: linear.id,
       contactId: karri.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -215,6 +243,7 @@ async function main() {
       companyId: vercel.id,
       contactId: guillermo.id,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -228,6 +257,7 @@ async function main() {
       companyId: figma.id,
       contactId: dylan.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -241,6 +271,7 @@ async function main() {
       companyId: supabase.id,
       contactId: paul.id,
       ownerId: memberUser.id,
+      workspaceId: workspace.id,
     },
   });
 
@@ -254,10 +285,11 @@ async function main() {
       companyId: linear.id,
       contactId: karri.id,
       ownerId: demoUser.id,
+      workspaceId: workspace.id,
     },
   });
 
-  // 5. Create Tasks
+  // 6. Create Tasks
   await db.task.createMany({
     data: [
       {
@@ -269,6 +301,7 @@ async function main() {
         dealId: deal1.id,
         contactId: patrick.id,
         ownerId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         title: "Finalize MSA and commercial terms with Karri",
@@ -279,6 +312,7 @@ async function main() {
         dealId: deal2.id,
         contactId: karri.id,
         ownerId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         title: "Prepare live technical demo for Figma design ops",
@@ -289,6 +323,7 @@ async function main() {
         dealId: deal4.id,
         contactId: dylan.id,
         ownerId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         title: "Schedule onboarding kickoff with Vercel team",
@@ -299,11 +334,12 @@ async function main() {
         dealId: deal3.id,
         contactId: guillermo.id,
         ownerId: memberUser.id,
+        workspaceId: workspace.id,
       },
     ],
   });
 
-  // 6. Create Activity Logs
+  // 7. Create Activity Logs
   await db.activityLog.createMany({
     data: [
       {
@@ -312,6 +348,7 @@ async function main() {
         relatedType: "DEAL",
         relatedId: deal1.id,
         userId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         type: "STAGE_CHANGE",
@@ -319,6 +356,7 @@ async function main() {
         relatedType: "DEAL",
         relatedId: deal2.id,
         userId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         type: "CALL",
@@ -326,6 +364,7 @@ async function main() {
         relatedType: "CONTACT",
         relatedId: karri.id,
         userId: demoUser.id,
+        workspaceId: workspace.id,
       },
       {
         type: "NOTE",
@@ -333,6 +372,7 @@ async function main() {
         relatedType: "DEAL",
         relatedId: deal3.id,
         userId: memberUser.id,
+        workspaceId: workspace.id,
       },
       {
         type: "EMAIL",
@@ -340,6 +380,7 @@ async function main() {
         relatedType: "CONTACT",
         relatedId: paul.id,
         userId: memberUser.id,
+        workspaceId: workspace.id,
       },
     ],
   });

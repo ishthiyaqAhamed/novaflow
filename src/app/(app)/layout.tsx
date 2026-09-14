@@ -24,11 +24,13 @@ export default async function AppLayout({
       const [deals, tasks] = await Promise.all([
         db.deal.count({
           where: {
+            workspaceId: user.workspaceId,
             stage: { notIn: ["WON", "LOST"] },
           },
         }),
         db.task.count({
           where: {
+            workspaceId: user.workspaceId,
             status: { not: "DONE" },
           },
         }),
