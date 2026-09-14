@@ -1,9 +1,13 @@
 import OpenAI from "openai"
 import { db } from "@/lib/db"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+function getOpenAIClient(): OpenAI | null {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    return null
+  }
+  return new OpenAI({ apiKey })
+}
 
 export async function getWorkspaceCrmContext(workspaceId: string, userName: string) {
   try {
@@ -127,6 +131,11 @@ export async function askNovaAi({
   workspaceId: string
   userName: string
 }) {
+  const openai = getOpenAIClient()
+  if (!openai) {
+    return "OpenAI API key is not configured in the environment variables. Please set `OPENAI_API_KEY` in your environment settings."
+  }
+
   const context = await getWorkspaceCrmContext(workspaceId, userName)
 
   const systemPrompt = `You are Nova AI, an intelligent, helpful, and insightful executive CRM Copilot built specifically for NovaFlow.
