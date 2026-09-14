@@ -7,6 +7,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env.DATABASE_URL || "postgres://placeholder:placeholder@db.prisma.io:5432/postgres?sslmode=require",
+    url: process.env.DIRECT_URL || process.env.DATABASE_URL || "postgres://placeholder:placeholder@db.prisma.io:5432/postgres?sslmode=require",
   },
 });

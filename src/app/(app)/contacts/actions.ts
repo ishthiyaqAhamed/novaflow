@@ -7,15 +7,37 @@ import { revalidatePath } from "next/cache"
 export async function createContact(formData: FormData) {
   const user = await requireUser()
 
-  const name = formData.get("name") as string
-  const email = formData.get("email") as string
-  const phone = formData.get("phone") as string
-  const title = formData.get("title") as string
+  const name = (formData.get("name") as string)?.trim()
+  const email = (formData.get("email") as string)?.trim()
+  const phone = (formData.get("phone") as string)?.trim()
+  const title = (formData.get("title") as string)?.trim()
   const status = (formData.get("status") as string) || "ACTIVE"
-  const companyId = (formData.get("companyId") as string) || null
+
+  let companyId = (formData.get("companyId") as string)?.trim() || null
+  const companyName = (formData.get("companyName") as string)?.trim()
 
   if (!name || !email) {
     throw new Error("Name and email are required")
+  }
+
+  // Auto-resolve or create Company if typed by name
+  if (!companyId && companyName) {
+    let company = await db.company.findFirst({
+      where: {
+        name: { equals: companyName, mode: "insensitive" },
+        workspaceId: user.workspaceId,
+      },
+    })
+    if (!company) {
+      company = await db.company.create({
+        data: {
+          name: companyName,
+          workspaceId: user.workspaceId,
+          ownerId: user.id,
+        },
+      })
+    }
+    companyId = company.id
   }
 
   const contact = await db.contact.create({
@@ -44,6 +66,7 @@ export async function createContact(formData: FormData) {
 
   revalidatePath("/contacts")
   revalidatePath("/dashboard")
+  revalidatePath("/companies")
   return { success: true }
 }
 

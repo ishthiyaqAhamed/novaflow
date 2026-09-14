@@ -290,32 +290,32 @@ export function TasksClient({ initialTasks, deals, contacts }: TasksClientProps)
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-muted font-medium mb-1">Associated Deal</label>
-                  <select
-                    name="dealId"
+                  <input
+                    list="task-deals-list"
+                    name="dealTitle"
+                    placeholder="Type or select deal..."
                     className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="">None</option>
+                  />
+                  <datalist id="task-deals-list">
                     {deals.map(d => (
-                      <option key={d.id} value={d.id}>
-                        {d.title}
-                      </option>
+                      <option key={d.id} value={d.title} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
-                  <label className="block text-muted font-medium mb-1">Contact</label>
-                  <select
-                    name="contactId"
+                  <label className="block text-muted font-medium mb-1">Contact Person</label>
+                  <input
+                    list="task-contacts-list"
+                    name="contactName"
+                    placeholder="Type or select contact..."
                     className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="">None</option>
+                  />
+                  <datalist id="task-contacts-list">
                     {contacts.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
+                      <option key={c.id} value={c.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 

@@ -358,33 +358,33 @@ export function DealsClient({ initialDeals, companies, contacts }: DealsClientPr
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted font-medium mb-1">Company</label>
-                  <select
-                    name="companyId"
+                  <label className="block text-muted font-medium mb-1">Company Account</label>
+                  <input
+                    list="deal-companies-list"
+                    name="companyName"
+                    placeholder="Type or select company..."
                     className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Select Company...</option>
+                  />
+                  <datalist id="deal-companies-list">
                     {companies.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
+                      <option key={c.id} value={c.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
-                  <label className="block text-muted font-medium mb-1">Contact</label>
-                  <select
-                    name="contactId"
+                  <label className="block text-muted font-medium mb-1">Key Contact Person</label>
+                  <input
+                    list="deal-contacts-list"
+                    name="contactName"
+                    placeholder="Type or select contact..."
                     className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Select Contact...</option>
+                  />
+                  <datalist id="deal-contacts-list">
                     {contacts.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
+                      <option key={c.id} value={c.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
               </div>
 

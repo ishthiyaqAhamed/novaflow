@@ -283,18 +283,18 @@ export function ContactsClient({ initialContacts, companies }: ContactsClientPro
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted font-medium mb-1">Company</label>
-                  <select
-                    name="companyId"
+                  <label className="block text-muted font-medium mb-1">Company Account</label>
+                  <input
+                    list="contact-companies-list"
+                    name="companyName"
+                    placeholder="Type or select company..."
                     className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Select Company...</option>
+                  />
+                  <datalist id="contact-companies-list">
                     {companies.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
+                      <option key={c.id} value={c.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
