@@ -207,7 +207,7 @@ async function main() {
 
   const deal3 = await db.deal.create({
     data: {
-      title: "Next.js Cloud Edge Automation Suite",
+      title: "Edge Cloud Infrastructure Suite",
       value: 85000,
       stage: "WON",
       probability: 100,

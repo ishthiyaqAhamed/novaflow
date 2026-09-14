@@ -17,7 +17,7 @@ interface DemoDeal {
 const INITIAL_DEALS: DemoDeal[] = [
   { id: "1", title: "Global Enterprise Billing Integration", company: "Stripe", contact: "Patrick Collison", value: 120000, stage: "PROPOSAL", probability: 75, date: "Oct 24" },
   { id: "2", title: "Linear Multi-Team Workspace Upgrade", company: "Linear", contact: "Karri Saarinen", value: 48000, stage: "DEMO", probability: 50, date: "Oct 18" },
-  { id: "3", title: "Next.js Edge Cloud Automation", company: "Vercel", contact: "Guillermo Rauch", value: 85000, stage: "WON", probability: 100, date: "Oct 12" },
+  { id: "3", title: "Enterprise Cloud Automation Suite", company: "Vercel", contact: "Guillermo Rauch", value: 85000, stage: "WON", probability: 100, date: "Oct 12" },
   { id: "4", title: "Design System Ops Integration", company: "Figma", contact: "Dylan Field", value: 95000, stage: "LEAD", probability: 25, date: "Nov 02" },
 ]
 
