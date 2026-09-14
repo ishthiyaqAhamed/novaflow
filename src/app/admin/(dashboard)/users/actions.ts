@@ -12,6 +12,10 @@ export async function updateUserRole(userId: string, newRole: string) {
     throw new Error("Forbidden")
   }
 
+  if (newRole === "ADMIN") {
+    throw new Error("Cannot promote user to Admin. Only the system hardcoded admin is an Admin.")
+  }
+
   const target = await db.user.findUnique({ where: { id: userId } })
   if (target && isSystemAdminEmail(target.email)) {
     throw new Error("Super Admin role cannot be modified.")
@@ -19,7 +23,7 @@ export async function updateUserRole(userId: string, newRole: string) {
 
   await db.user.update({
     where: { id: userId },
-    data: { role: newRole },
+    data: { role: "MEMBER" },
   })
 
   revalidatePath("/admin/users")

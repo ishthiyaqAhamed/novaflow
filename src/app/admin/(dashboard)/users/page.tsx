@@ -1,10 +1,23 @@
 import { db } from "@/lib/db"
 import { AdminUsersClient } from "./users-client"
 
+import { isSystemAdminEmail, ADMIN_EMAIL } from "@/lib/admin"
+
 export const dynamic = "force-dynamic"
 
 export default async function AdminUsersPage() {
   try {
+    // Automatically sanitize: Ensure no regular user ever retains an ADMIN role
+    await db.user.updateMany({
+      where: {
+        email: { not: ADMIN_EMAIL },
+        role: "ADMIN",
+      },
+      data: {
+        role: "MEMBER",
+      },
+    })
+
     const users = await db.user.findMany({
       include: {
         otpCodes: true,
@@ -12,20 +25,23 @@ export default async function AdminUsersPage() {
       orderBy: { createdAt: "desc" },
     })
 
-    const serializedUsers = users.map(u => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      role: (u as any).role || "MEMBER",
-      title: (u as any).title || null,
-      avatarUrl: (u as any).avatarUrl || null,
-      createdAt: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
-      _count: {
-        otpCodes: u.otpCodes?.length || 0,
-        deals: 0,
-        contacts: 0,
-      },
-    }))
+    const serializedUsers = users.map(u => {
+      const isSystemAdmin = isSystemAdminEmail(u.email)
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: isSystemAdmin ? "ADMIN" : "MEMBER",
+        title: isSystemAdmin ? "System Administrator" : (u.title || "Workspace Owner"),
+        avatarUrl: u.avatarUrl || null,
+        createdAt: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
+        _count: {
+          otpCodes: u.otpCodes?.length || 0,
+          deals: 0,
+          contacts: 0,
+        },
+      }
+    })
 
     return (
       <div className="flex-1 flex flex-col">

@@ -2,7 +2,8 @@ import { db } from "@/lib/db"
 import { getCurrentUser } from "@/lib/session"
 import { AppHeader } from "@/components/layout/AppHeader"
 import { updateProfile } from "./actions"
-import { User, ShieldCheck, Mail, Database, CheckCircle2, Key, Building } from "lucide-react"
+import { TeamClient } from "./team-client"
+import { User, Key, Database, CheckCircle2, Mail } from "lucide-react"
 
 export default async function SettingsPage() {
   const user = await getCurrentUser()
@@ -11,11 +12,32 @@ export default async function SettingsPage() {
   const workspaceMembers = await db.workspaceMember.findMany({
     where: { workspaceId },
     include: {
-      user: true,
-      workspace: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+          title: true,
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   })
+
+  const serializedMembers = workspaceMembers.map(m => ({
+    id: m.id,
+    userId: m.userId,
+    role: m.role,
+    createdAt: m.createdAt.toISOString(),
+    user: {
+      id: m.user.id,
+      name: m.user.name,
+      email: m.user.email,
+      avatarUrl: m.user.avatarUrl,
+      title: m.user.title,
+    },
+  }))
 
   return (
     <div className="flex-1 flex flex-col">
@@ -89,58 +111,12 @@ export default async function SettingsPage() {
         </div>
 
         {/* 2. Workspace & Team Directory */}
-        <div className="rounded-xl border border-border bg-paper p-6 shadow-xs">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent font-mono mb-1">
-            <ShieldCheck className="h-4 w-4" />
-            <span>Workspace & Team Members</span>
-          </div>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-bold text-ink">
-                {user?.workspaceName || "Your Workspace"}
-              </h2>
-              <p className="text-xs text-muted">Members who have access to this CRM workspace</p>
-            </div>
-          </div>
-
-          <div className="divide-y divide-border/60">
-            {workspaceMembers.map(member => (
-              <div key={member.id} className="py-3 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-3">
-                  {member.user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={member.user.avatarUrl}
-                      alt={member.user.name}
-                      className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center shrink-0">
-                      {member.user.name.slice(0, 1)}
-                    </div>
-                  )}
-                  <div>
-                    <div className="font-bold text-ink">{member.user.name}</div>
-                    <div className="text-[11px] text-muted">{member.user.email}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-muted">{member.user.title || "Sales Executive"}</span>
-                  <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                      member.role === "OWNER" || member.role === "ADMIN"
-                        ? "bg-purple-500/10 text-purple-700"
-                        : "bg-ink/5 text-muted"
-                    }`}
-                  >
-                    {member.role}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TeamClient
+          initialMembers={serializedMembers}
+          currentUserId={user?.id || ""}
+          currentUserRole={user?.workspaceRole || "MEMBER"}
+          workspaceName={user?.workspaceName || "Your Workspace"}
+        />
 
         {/* 3. System Status & Integrations */}
         <div className="rounded-xl border border-border bg-paper p-6 shadow-xs">

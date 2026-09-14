@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { getCurrentUser } from "@/lib/session"
+import { isSystemAdminEmail } from "@/lib/admin"
 import Link from "next/link"
 import {
   Users,
@@ -160,12 +161,12 @@ export default async function AdminOverviewPage() {
                         <td className="py-3 pr-2">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                              u.role === "ADMIN"
-                                ? "bg-purple-500/10 text-purple-700"
-                                : "bg-ink/5 text-muted"
+                              isSystemAdminEmail(u.email)
+                                ? "bg-purple-500/10 text-purple-700 border border-purple-500/20"
+                                : "bg-ink/5 text-muted border border-border"
                             }`}
                           >
-                            {u.role}
+                            {isSystemAdminEmail(u.email) ? "SUPER ADMIN" : "MEMBER"}
                           </span>
                         </td>
                         <td className="py-3 text-muted text-[11px] font-mono pr-2">

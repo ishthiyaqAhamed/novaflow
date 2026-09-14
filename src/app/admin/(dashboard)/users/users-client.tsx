@@ -48,7 +48,7 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
   })
 
   const handleDelete = (userId: string, email: string) => {
-    if (email.toLowerCase().includes("admin@")) {
+    if (email.toLowerCase().trim() === "admin@novaflow.com") {
       alert("The Super Admin account cannot be deleted.")
       return
     }
@@ -110,7 +110,7 @@ export function AdminUsersClient({ initialUsers }: { initialUsers: UserItem[] })
             </thead>
             <tbody className="divide-y divide-border/60">
               {filteredUsers.map(u => {
-                const isAdmin = u.role === "ADMIN"
+                const isAdmin = u.email.toLowerCase().trim() === "admin@novaflow.com"
 
                 return (
                   <tr key={u.id} className="hover:bg-ink/[0.01] transition-colors">
