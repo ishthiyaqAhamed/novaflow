@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String        @id @default(cuid())
+  name              String
+  email             String        @unique
+  password          String
+  role              String        @default("ADMIN")
+  avatarUrl         String?
+  phone             String?
+  title             String?       @default("Sales Executive")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  otpCodes          OtpCode[]
+  companies         Company[]
+  contacts          Contact[]
+  deals             Deal[]
+  tasks             Task[]
+  activityLogs      ActivityLog[]
+}
+
+model OtpCode {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code       String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Company {
+  id          String     @id @default(cuid())
+  name        String
+  domain      String?
+  industry    String?    @default("Technology")
+  size        String?    @default("50-200")
+  phone       String?
+  address     String?
+  website     String?
+  annualRevenue Float?   @default(0)
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  contacts    Contact[]
+  deals       Deal[]
+
+  @@index([ownerId])
+}
+
+model Contact {
+  id          String     @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  title       String?    @default("Decision Maker")
+  status      String     @default("ACTIVE") // ACTIVE, LEAD, CHURNED
+  avatarUrl   String?
+  companyId   String?
+  company     Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  deals       Deal[]
+  tasks       Task[]
+
+  @@index([ownerId])
+  @@index([companyId])
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  title             String
+  value             Float      @default(0)
+  stage             String     @default("LEAD") // LEAD, QUALIFIED, DEMO, PROPOSAL, NEGOTIATION, WON, LOST
+  probability       Int        @default(20)
+  expectedCloseDate DateTime?
+  companyId         String?
+  company           Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contactId         String?
+  contact           Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  ownerId           String
+  owner             User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  tasks             Task[]
+
+  @@index([ownerId])
+  @@index([companyId])
+  @@index([contactId])
+  @@index([stage])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  priority    String     @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status      String     @default("TODO")   // TODO, IN_PROGRESS, DONE
+  dealId      String?
+  deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  contactId   String?
+  contact     Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([ownerId])
+  @@index([dealId])
+  @@index([contactId])
+}
+
+model ActivityLog {
+  id          String     @id @default(cuid())
+  type        String     @default("NOTE") // NOTE, CALL, MEETING, EMAIL, STAGE_CHANGE
+  note        String
+  relatedType String?    // DEAL, CONTACT, COMPANY, TASK
+  relatedId   String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@index([relatedType, relatedId])
+}

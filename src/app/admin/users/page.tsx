@@ -1,0 +1,52 @@
+import { db } from "@/lib/db"
+import { AdminUsersClient } from "./users-client"
+
+export const dynamic = "force-dynamic"
+
+export default async function AdminUsersPage() {
+  try {
+    const users = await db.user.findMany({
+      include: {
+        otpCodes: true,
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    const serializedUsers = users.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: (u as any).role || "MEMBER",
+      title: (u as any).title || null,
+      avatarUrl: (u as any).avatarUrl || null,
+      createdAt: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
+      _count: {
+        otpCodes: u.otpCodes?.length || 0,
+        deals: 0,
+        contacts: 0,
+      },
+    }))
+
+    return (
+      <div className="flex-1 flex flex-col">
+        <header className="h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-6 flex items-center justify-between shrink-0 sticky top-0 z-40">
+          <div>
+            <h1 className="text-base font-bold text-ink leading-tight">User Management</h1>
+            <p className="text-[11px] text-muted">Manage access roles, inspect registration history, and administer workspace accounts.</p>
+          </div>
+        </header>
+
+        <AdminUsersClient initialUsers={serializedUsers} />
+      </div>
+    )
+  } catch (error) {
+    console.error("AdminUsersPage error:", error)
+    return (
+      <div className="flex-1 p-6">
+        <div className="p-4 rounded-xl border border-alert/20 bg-alert/5 text-alert text-xs">
+          Failed to load users. Please refresh.
+        </div>
+      </div>
+    )
+  }
+}

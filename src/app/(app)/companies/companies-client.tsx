@@ -1,0 +1,254 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import {
+  Plus,
+  Search,
+  Building2,
+  Globe,
+  Users,
+  DollarSign,
+  Trash2,
+  X,
+  ExternalLink,
+} from "lucide-react"
+import { createCompany, deleteCompany } from "./actions"
+
+interface CompanyItem {
+  id: string
+  name: string
+  domain: string | null
+  industry: string | null
+  size: string | null
+  phone: string | null
+  website: string | null
+  annualRevenue: number | null
+  contacts: { id: string; name: string }[]
+  deals: { id: string; title: string; value: number; stage: string }[]
+}
+
+interface CompaniesClientProps {
+  initialCompanies: CompanyItem[]
+}
+
+export function CompaniesClient({ initialCompanies }: CompaniesClientProps) {
+  const [companies, setCompanies] = useState<CompanyItem[]>(initialCompanies)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showModal, setShowModal] = useState(false)
+  const [isPending, startTransition] = useTransition()
+
+  const filteredCompanies = companies.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.domain?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.industry?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const handleDelete = (companyId: string) => {
+    if (!confirm("Are you sure you want to delete this company?")) return
+    setCompanies(prev => prev.filter(c => c.id !== companyId))
+    startTransition(async () => {
+      await deleteCompany(companyId)
+    })
+  }
+
+  return (
+    <div className="flex-1 flex flex-col p-6 space-y-6 max-w-7xl">
+      {/* Header controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="relative w-full sm:w-72">
+          <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search companies & domains..."
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border bg-paper placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+          />
+        </div>
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-ink hover:bg-accent text-paper text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          <span>Add Company</span>
+        </button>
+      </div>
+
+      {/* Companies Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {filteredCompanies.length === 0 ? (
+          <div className="col-span-full py-12 text-center text-muted border border-dashed border-border rounded-xl">
+            No companies found. Add your first target account!
+          </div>
+        ) : (
+          filteredCompanies.map(company => {
+            const activeDeals = company.deals.filter(d => !["WON", "LOST"].includes(d.stage))
+            const pipelineSum = activeDeals.reduce((sum, d) => sum + d.value, 0)
+
+            return (
+              <div
+                key={company.id}
+                className="group rounded-xl border border-border bg-paper p-5 shadow-xs hover:shadow-md hover:border-accent/40 transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-ink text-paper font-bold flex items-center justify-center text-base shrink-0 shadow-xs">
+                        {company.name.slice(0, 1)}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-ink">{company.name}</h3>
+                        <p className="text-[11px] text-muted">{company.industry || "Technology"}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleDelete(company.id)}
+                      className="opacity-0 group-hover:opacity-100 text-muted hover:text-alert p-1 transition-opacity"
+                      title="Delete company"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 py-3 border-y border-border/60 text-xs">
+                    {company.domain && (
+                      <div className="flex items-center justify-between text-muted">
+                        <span>Domain:</span>
+                        <a
+                          href={company.website || `https://${company.domain}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-accent hover:underline flex items-center gap-1"
+                        >
+                          <span>{company.domain}</span>
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-muted">
+                      <span>Size:</span>
+                      <span className="font-medium text-ink">{company.size || "50-200"}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-muted">
+                      <span>Stakeholders:</span>
+                      <span className="font-mono font-bold text-ink">
+                        {company.contacts.length} contact{company.contacts.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-2 flex items-center justify-between text-xs">
+                  <span className="text-muted">Active Pipeline:</span>
+                  <span className="font-mono font-bold text-ink">
+                    ${pipelineSum.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* New Company Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-paper p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-ink">Add Company Account</h2>
+              <button onClick={() => setShowModal(false)} className="text-muted hover:text-ink">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form
+              action={async formData => {
+                await createCompany(formData)
+                setShowModal(false)
+                window.location.reload()
+              }}
+              className="space-y-3.5 text-xs"
+            >
+              <div>
+                <label className="block text-muted font-medium mb-1">Company Name *</label>
+                <input
+                  name="name"
+                  required
+                  placeholder="e.g. Acme Corp"
+                  className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-muted font-medium mb-1">Domain</label>
+                  <input
+                    name="domain"
+                    placeholder="acme.com"
+                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs font-mono focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-muted font-medium mb-1">Industry</label>
+                  <input
+                    name="industry"
+                    placeholder="e.g. Fintech"
+                    defaultValue="Technology"
+                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-muted font-medium mb-1">Company Size</label>
+                  <select
+                    name="size"
+                    defaultValue="50-200"
+                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs focus:outline-none focus:border-accent"
+                  >
+                    <option value="1-10">1-10 employees</option>
+                    <option value="10-50">10-50 employees</option>
+                    <option value="50-200">50-200 employees</option>
+                    <option value="200-1000">200-1000 employees</option>
+                    <option value="1000+">1000+ employees</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-muted font-medium mb-1">Phone</label>
+                  <input
+                    name="phone"
+                    placeholder="+1 (555) 000-0000"
+                    className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs font-mono focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-3 py-2 rounded-lg border border-border text-muted hover:text-ink"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-ink hover:bg-accent text-paper font-semibold px-4 py-2 rounded-lg transition-colors shadow-xs"
+                >
+                  Save Company
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
