@@ -1,75 +1,76 @@
-# NovaFlow CRM 🚀
+# NovaFlow CRM
 
-A modern, multi-tenant B2B SaaS CRM built with **Next.js 16 (App Router)**, **Supabase PostgreSQL**, **Prisma ORM 7**, and an **OpenAI GPT-4o CRM Copilot**.
+A multi-tenant B2B SaaS CRM built with Next.js 16 (App Router), Supabase PostgreSQL, Prisma ORM 7, and an OpenAI GPT-4o CRM Copilot.
 
-NovaFlow gives sales teams and founders an all-in-one workspace to manage pipeline deals, track stakeholder relationships, automate follow-up tasks, collaborate with invited teammates, and interact with a live AI assistant that understands their real-time CRM telemetry.
+NovaFlow gives sales teams and founders an all-in-one workspace to manage pipeline deals, track stakeholder relationships, automate follow-up tasks, collaborate with invited teammates, and interact with a live AI assistant that understands real-time CRM data.
 
 ---
 
-## ✨ Features & Capabilities
+## Features & Capabilities
 
-### 🏢 1. True Multi-Tenant SaaS Architecture
-- **Dedicated Workspaces**: Every user who signs up automatically receives an isolated workspace (`Workspace` & `WorkspaceMember`).
-- **Complete Data Isolation**: Deals, contacts, accounts, tasks, and activity logs are strictly scoped by `workspaceId`.
-- **Team Collaboration**: Invite colleagues by email into your workspace and assign roles (`OWNER`, `ADMIN`, `MEMBER`).
+### 1. Multi-Tenant SaaS Architecture
+- Dedicated Workspaces: Every user who signs up automatically gets an isolated workspace (`Workspace` & `WorkspaceMember`).
+- Data Isolation: Deals, contacts, accounts, tasks, and activity logs are strictly scoped by `workspaceId`.
+- Team Collaboration: Invite colleagues by email into your workspace and assign roles (`OWNER`, `ADMIN`, `MEMBER`).
 
-### 🤖 2. Nova AI Copilot (OpenAI GPT-4o)
-- **Context-Aware Assistant**: Floating AI copilot available across all CRM views (`Ask Nova AI`).
-- **Real-Time Workspace RAG**: Nova AI queries live database records to answer questions about:
+### 2. Nova AI Copilot (OpenAI GPT-4o)
+- Context-Aware Assistant: Floating AI copilot available across all CRM views (`Ask Nova AI`).
+- Real-Time Workspace RAG: Nova AI queries live database records to answer questions about:
   - Active pipeline value and deal breakdown by stage.
   - Urgent pending tasks and upcoming due dates.
   - Key decision-makers and high-revenue target accounts.
   - Actionable sales strategy to advance deals in Negotiation to `WON`.
-- **Quick-Action Chips**: One-click prompts for pipeline summaries, hot deals, and daily priorities.
+- Quick-Action Chips: One-click prompts for pipeline summaries, hot deals, and daily priorities.
 
-### 📊 3. Visual Deal Pipeline (Kanban Board)
-- **Stage Management**: Track opportunities across 7 stages: `LEAD`, `QUALIFIED`, `DEMO`, `PROPOSAL`, `NEGOTIATION`, `WON`, and `LOST`.
-- **Pipeline Analytics**: Real-time revenue metrics, win probabilities, and expected close dates.
-- **Flexible Data Entry**: Modals support direct typing and autocomplete with auto-creation of missing companies and contacts on the fly.
+### 3. Visual Deal Pipeline (Kanban Board)
+- Stage Management: Track opportunities across 7 stages: `LEAD`, `QUALIFIED`, `DEMO`, `PROPOSAL`, `NEGOTIATION`, `WON`, and `LOST`.
+- Pipeline Analytics: Real-time revenue metrics, win probabilities, and expected close dates.
+- Flexible Data Entry: Modals support direct typing and autocomplete with auto-creation of missing companies and contacts on the fly.
+- Mobile Responsive: Stage switcher tabs and horizontal touch snap-scrolling on mobile devices.
 
-### 👥 4. Contacts & Company Accounts
-- **Contacts Directory**: Manage leads, active clients, and churned accounts with titles, phone numbers, and linked deals.
-- **Company Accounts**: Track target organizations, domain websites, industry categories, employee sizes, and pipeline value.
-- **CSV Bulk Import & Export**:
+### 4. Contacts & Company Accounts
+- Contacts Directory: Manage leads, active clients, and churned accounts with titles, phone numbers, and linked deals.
+- Company Accounts: Track target organizations, domain websites, industry categories, employee sizes, and pipeline value.
+- CSV Bulk Import & Export:
   - Download entire contact lists and company accounts to standard `.csv` spreadsheets.
   - Upload CSV files with live preview, schema validation, and automatic company linking.
 
-### ✅ 5. Task Manager & Activity Log
-- **Task Prioritization**: Organize action items with priorities (`LOW`, `MEDIUM`, `HIGH`, `URGENT`) and due dates.
-- **Entity Linking**: Connect tasks directly to specific deals or contacts.
-- **Audit & Activity Stream**: Real-time logging of calls, meetings, notes, and deal stage changes.
+### 5. Task Manager & Activity Log
+- Task Prioritization: Organize action items with priorities (`LOW`, `MEDIUM`, `HIGH`, `URGENT`) and due dates.
+- Entity Linking: Connect tasks directly to specific deals or contacts.
+- Audit & Activity Stream: Real-time logging of calls, meetings, notes, and deal stage changes.
 
-### 🔐 6. Authentication & Security
-- **Email OTP Verification**: 6-digit verification codes powered by Resend email delivery.
-- **Password Recovery**: Complete forgot password and password reset flow using secure single-use OTP tokens.
-- **Protected Sessions**: Secure HTTP-only cookies (`novaflow_session`).
+### 6. Authentication & Security
+- Email OTP Verification: 6-digit verification codes powered by Resend email delivery.
+- Password Recovery: Complete forgot password and password reset flow using secure single-use OTP tokens.
+- Protected Sessions: Secure HTTP-only cookies (`novaflow_session`).
 
-### 🛡️ 7. Super Administrator Portal
-- **Hardcoded System Admin**: Dedicated login portal at `/admin/login` restricted to system administrators.
-- **Default Credentials**:
-  - **Email**: `admin@novaflow.com`
-  - **Password**: `admin@nova`
-- **System Telemetry**:
+### 7. Super Administrator Portal
+- Dedicated Admin Portal: Login portal at `/admin/login` restricted to system administrators.
+- Default Credentials:
+  - Email: `admin@novaflow.com`
+  - Password: `admin@nova`
+- System Telemetry:
   - Inspect user registrations and workspace accounts.
   - Monitor live OTP token dispatch streams and verification status.
   - Database latency and Resend email delivery health checks.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Server Actions, Turbopack)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Database**: [Supabase](https://supabase.com/) (Managed PostgreSQL)
-- **ORM**: [Prisma ORM 7](https://www.prisma.io/) with `@prisma/adapter-pg` driver adapter
-- **AI Engine**: [OpenAI API](https://platform.openai.com/) (`gpt-4o-mini`)
-- **Email Delivery**: [Resend](https://resend.com/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+- Framework: Next.js 16 (App Router, Server Actions, Turbopack)
+- Language: TypeScript
+- Database: Supabase (Managed PostgreSQL)
+- ORM: Prisma ORM 7 with `@prisma/adapter-pg` driver adapter
+- AI Engine: OpenAI API (`gpt-4o-mini`)
+- Email Delivery: Resend
+- Styling: Tailwind CSS v4
+- Icons: Lucide React
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 novaflow/
@@ -105,7 +106,8 @@ novaflow/
 │   │   │   └── AiChatbot.tsx  # Floating Nova AI Copilot widget
 │   │   └── layout/
 │   │       ├── AppSidebar.tsx # User CRM navigation sidebar
-│   │       └── AppHeader.tsx  # Top bar with user profile
+│   │       ├── AppHeader.tsx  # Top bar with user profile
+│   │       └── AdminSidebar.tsx # Admin mobile & desktop sidebar
 │   └── lib/
 │       ├── ai.ts              # Workspace RAG context builder & OpenAI integration
 │       ├── admin.ts           # Super Admin constants and email guards
@@ -118,12 +120,12 @@ novaflow/
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### 1. Prerequisites
-- [Node.js](https://nodejs.org/) v18.18+ or v20+
-- [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/)
-- A [Supabase](https://supabase.com/) account or PostgreSQL database
+- Node.js v18.18+ or v20+
+- npm or pnpm
+- A Supabase account or PostgreSQL database
 
 ### 2. Clone and Install Dependencies
 ```bash
@@ -162,25 +164,25 @@ npx prisma db push
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open http://localhost:3000 in your browser.
 
 ---
 
-## 🔍 Database Visual GUI (Prisma Studio)
+## Database Visual GUI (Prisma Studio)
 
 To inspect and manage all tables and rows directly in your browser:
 ```bash
 npx prisma studio
 ```
-Access Prisma Studio at [http://localhost:5555](http://localhost:5555).
+Access Prisma Studio at http://localhost:5555.
 
 ---
 
-## 🚢 Deployment to Vercel
+## Deployment to Vercel
 
 1. Push your repository to GitHub.
-2. Import the repository in [Vercel](https://vercel.com/).
-3. Add the environment variables (`DATABASE_URL`, `DIRECT_URL`, `RESEND_API_KEY`, `OPENAI_API_KEY`, `ADMIN_PASSWORD`) under **Project Settings > Environment Variables**.
+2. Import the repository in Vercel.
+3. Add the environment variables (`DATABASE_URL`, `DIRECT_URL`, `RESEND_API_KEY`, `OPENAI_API_KEY`, `ADMIN_PASSWORD`) under Project Settings > Environment Variables.
 4. Set the build command to:
    ```bash
    prisma generate && next build
@@ -189,6 +191,6 @@ Access Prisma Studio at [http://localhost:5555](http://localhost:5555).
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
