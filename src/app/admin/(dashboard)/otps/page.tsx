@@ -18,7 +18,7 @@ export default async function AdminOtpsPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-6 flex items-center justify-between shrink-0 sticky top-0 z-40">
+      <header className="min-h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shrink-0 sticky top-0 z-40">
         <div>
           <h1 className="text-base font-bold text-ink leading-tight">OTP Codes & Verification Security</h1>
           <p className="text-[11px] text-muted">Inspect active and consumed one-time security tokens sent to users.</p>

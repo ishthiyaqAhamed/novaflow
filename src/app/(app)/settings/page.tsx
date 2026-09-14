@@ -46,7 +46,7 @@ export default async function SettingsPage() {
         subtitle="Manage your profile, workspace team, and revenue integrations."
       />
 
-      <div className="p-6 space-y-8 max-w-4xl">
+      <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 max-w-4xl">
         {/* 1. Profile Information */}
         <div className="rounded-xl border border-border bg-paper p-6 shadow-xs">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent font-mono mb-1">

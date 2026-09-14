@@ -98,48 +98,89 @@ export function DealsClient({ initialDeals, companies, contacts }: DealsClientPr
     })
   }
 
+  const [mobileStageFilter, setMobileStageFilter] = useState<string>("ALL")
+
+  const visibleStages = mobileStageFilter === "ALL" 
+    ? STAGES 
+    : STAGES.filter(s => s.key === mobileStageFilter)
+
   return (
-    <div className="flex-1 flex flex-col p-6 space-y-6">
+    <div className="flex-1 flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Top Header Controls & Metrics */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <span className="text-xs text-muted">Active Pipeline:</span>
-            <span className="font-display text-xl font-bold text-ink font-mono">
+            <span className="font-display text-lg sm:text-xl font-bold text-ink font-mono">
               ${totalActivePipeline.toLocaleString()}
             </span>
-            <span className="text-border">|</span>
+            <span className="text-border hidden sm:inline">|</span>
             <span className="text-xs text-signal font-medium">
-              Closed Won: ${totalWon.toLocaleString()}
+              Won: ${totalWon.toLocaleString()}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
             <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Filter deals..."
+              placeholder="Search deals, accounts, contacts..."
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border bg-paper placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
             />
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="bg-ink hover:bg-accent text-paper text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-xs flex items-center gap-1.5 shrink-0"
+            className="bg-ink hover:bg-accent text-paper text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-xs flex items-center gap-1.5 shrink-0"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span>New Deal</span>
+            <span>Add Deal</span>
           </button>
         </div>
       </div>
 
-      {/* Kanban Columns Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 overflow-x-auto pb-4">
+      {/* Mobile Stage Filter Tabs */}
+      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+        <button
+          onClick={() => setMobileStageFilter("ALL")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+            mobileStageFilter === "ALL"
+              ? "bg-ink text-paper"
+              : "bg-ink/5 text-muted hover:text-ink"
+          }`}
+        >
+          All Stages ({filteredDeals.length})
+        </button>
         {STAGES.map(stage => {
+          const count = filteredDeals.filter(d => d.stage === stage.key).length
+          const isSelected = mobileStageFilter === stage.key
+
+          return (
+            <button
+              key={stage.key}
+              onClick={() => setMobileStageFilter(stage.key)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                isSelected
+                  ? "bg-ink text-paper"
+                  : "bg-ink/5 text-muted hover:text-ink"
+              }`}
+            >
+              <span>{stage.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? "bg-accent text-paper" : "bg-ink/10 text-muted"}`}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Kanban Columns Board */}
+      <div className="flex lg:grid lg:grid-cols-7 gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+        {visibleStages.map(stage => {
           const stageDeals = filteredDeals.filter(d => d.stage === stage.key)
           const stageTotal = stageDeals.reduce((sum, d) => sum + d.value, 0)
 

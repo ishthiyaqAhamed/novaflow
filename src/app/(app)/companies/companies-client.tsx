@@ -124,7 +124,7 @@ export function CompaniesClient({ initialCompanies }: CompaniesClientProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col p-6 space-y-6 max-w-7xl">
+    <div className="flex-1 flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl">
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">

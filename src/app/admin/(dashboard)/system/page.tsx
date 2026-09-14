@@ -18,14 +18,14 @@ export default async function AdminSystemPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <header className="h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-6 flex items-center justify-between shrink-0 sticky top-0 z-40">
+      <header className="min-h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shrink-0 sticky top-0 z-40">
         <div>
           <h1 className="text-base font-bold text-ink leading-tight">System Health & Email Infrastructure</h1>
           <p className="text-[11px] text-muted">Verify active database connections, Resend domain authentication, and security parameters.</p>
         </div>
       </header>
 
-      <div className="p-6 space-y-6 max-w-5xl">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-5xl">
         {/* Domain Verification Status Banner */}
         <div className="rounded-xl border border-signal/30 bg-signal/5 p-5 flex items-start gap-4">
           <div className="h-10 w-10 rounded-xl bg-signal/15 text-signal flex items-center justify-center shrink-0">

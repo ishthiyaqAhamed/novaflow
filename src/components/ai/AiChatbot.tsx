@@ -134,15 +134,15 @@ export function AiChatbot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 select-none">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 select-none">
       {/* Trigger Floating Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 bg-ink hover:bg-accent text-paper px-4 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 border border-white/10"
+          className="group relative flex items-center gap-2 bg-ink hover:bg-accent text-paper px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 border border-white/10"
         >
           <div className="relative">
-            <Sparkles className="h-5 w-5 text-accent group-hover:text-paper transition-colors animate-pulse" />
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-accent group-hover:text-paper transition-colors animate-pulse" />
           </div>
           <span className="text-xs font-bold tracking-tight font-sans pr-1">Ask Nova AI</span>
           <span className="flex h-2 w-2 rounded-full bg-signal animate-ping absolute top-1 right-1"></span>
@@ -151,7 +151,7 @@ export function AiChatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[380px] sm:w-[440px] h-[580px] max-h-[85vh] rounded-2xl border border-border bg-paper shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="w-[calc(100vw-32px)] sm:w-[440px] h-[520px] sm:h-[580px] max-h-[80vh] rounded-2xl border border-border bg-paper shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header */}
           <div className="bg-ink text-paper p-4 flex items-center justify-between shrink-0 border-b border-white/10">
             <div className="flex items-center gap-2.5">

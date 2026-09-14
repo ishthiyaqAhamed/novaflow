@@ -89,7 +89,7 @@ export default async function DashboardPage() {
         subtitle={`Welcome back, ${user?.name || "Alex"}. Here is your revenue pipeline performance today.`}
       />
 
-      <div className="p-6 space-y-6 max-w-7xl">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl">
         {/* 1. KPI Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Active Pipeline */}

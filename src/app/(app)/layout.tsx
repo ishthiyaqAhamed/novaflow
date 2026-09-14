@@ -44,7 +44,7 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FDFCFB] text-ink font-sans selection:bg-accent/20">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-[#FDFCFB] text-ink font-sans selection:bg-accent/20">
       <AppSidebar
         user={user}
         activeDealsCount={activeDealsCount}

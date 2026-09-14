@@ -50,7 +50,7 @@ export default async function AdminOverviewPage() {
   return (
     <div className="flex-1 flex flex-col">
       {/* Admin Header */}
-      <header className="h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-6 flex items-center justify-between shrink-0 sticky top-0 z-40">
+      <header className="min-h-16 border-b border-border bg-paper/80 backdrop-blur-xs px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shrink-0 sticky top-0 z-40">
         <div>
           <h1 className="text-base font-bold text-ink leading-tight">Admin Overview & Metrics</h1>
           <p className="text-[11px] text-muted">Real-time user onboarding, authentication logs, and security telemetry.</p>
@@ -64,7 +64,7 @@ export default async function AdminOverviewPage() {
         </div>
       </header>
 
-      <div className="p-6 space-y-6 max-w-7xl">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl">
         {/* 1. Executive Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Registered Users */}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -13,6 +14,8 @@ import {
   LogOut,
   ChevronRight,
   TrendingUp,
+  Menu,
+  X,
 } from "lucide-react"
 import { SessionUser } from "@/lib/session"
 import { logout } from "@/app/(auth)/login/actions"
@@ -35,9 +38,15 @@ const NAV_ITEMS = [
 
 export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }: AppSidebarProps) {
   const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  return (
-    <aside className="w-64 border-r border-border bg-paper flex flex-col justify-between shrink-0 select-none min-h-screen">
+  // Auto-close mobile drawer when route changes
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  const navContent = (
+    <div className="flex flex-col justify-between h-full">
       {/* Brand & Workspace */}
       <div>
         <div className="h-16 border-b border-border px-5 flex items-center justify-between">
@@ -52,6 +61,15 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
               </span>
             </div>
           </Link>
+
+          {mobileOpen && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-muted hover:text-ink hover:bg-ink/5"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Links */}
@@ -65,7 +83,8 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
                   isActive
                     ? "bg-ink text-paper shadow-xs font-semibold"
                     : "text-muted hover:text-ink hover:bg-ink/[0.04]"
@@ -92,7 +111,8 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
           <div className="pt-3 mt-3 border-t border-border/60">
             <Link
               href="/admin/login"
-              className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
             >
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-3.5 w-3.5" />
@@ -129,12 +149,61 @@ export function AppSidebar({ user, activeDealsCount = 0, pendingTasksCount = 0 }
 
         <button
           onClick={() => logout()}
-          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs text-muted hover:text-alert hover:bg-alert/5 rounded-lg transition-all"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-muted hover:text-alert hover:bg-alert/5 rounded-lg transition-all"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span>Sign Out</span>
         </button>
       </div>
-    </aside>
+    </div>
+  )
+
+  return (
+    <>
+      {/* Mobile Top Sticky Navigation Bar */}
+      <div className="lg:hidden sticky top-0 z-40 h-14 border-b border-border bg-paper/95 backdrop-blur-md px-4 flex items-center justify-between w-full">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 -ml-2 rounded-lg text-ink hover:bg-ink/5 transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <span className="h-7 w-7 rounded-lg bg-ink text-paper flex items-center justify-center font-display font-bold text-sm shadow-xs">
+            N
+          </span>
+          <span className="font-display font-bold text-sm text-ink tracking-tight">NovaFlow</span>
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            className="h-7 w-7 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center text-xs"
+          >
+            {user?.name?.slice(0, 1) || "U"}
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile Backdrop & Drawer */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[80vw] bg-paper shadow-2xl flex flex-col justify-between z-50 h-full">
+            {navContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex w-64 border-r border-border bg-paper flex-col justify-between shrink-0 select-none min-h-screen">
+        {navContent}
+      </aside>
+    </>
   )
 }
