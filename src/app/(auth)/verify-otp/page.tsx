@@ -55,7 +55,7 @@ function VerifyOtpForm() {
           disabled={pending}
           className="w-full rounded-lg bg-ink text-paper py-2.5 text-xs font-semibold hover:bg-ink/90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          {pending ? "Verifying..." : "Verify & Continue to Admin"}
+          {pending ? "Verifying..." : "Verify & Continue"}
         </button>
       </form>
 
