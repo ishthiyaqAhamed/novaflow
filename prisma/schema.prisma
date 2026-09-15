@@ -96,6 +96,7 @@ model Company {
   deals         Deal[]
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt])
   @@index([ownerId])
 }
 
@@ -120,6 +121,7 @@ model Contact {
   tasks       Task[]
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt])
   @@index([ownerId])
   @@index([companyId])
 }
@@ -145,6 +147,8 @@ model Deal {
   tasks             Task[]
 
   @@index([workspaceId])
+  @@index([workspaceId, stage])
+  @@index([workspaceId, createdAt])
   @@index([ownerId])
   @@index([companyId])
   @@index([contactId])
@@ -170,6 +174,8 @@ model Task {
   updatedAt   DateTime   @updatedAt
 
   @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, dueDate])
   @@index([ownerId])
   @@index([dealId])
   @@index([contactId])
@@ -188,6 +194,7 @@ model ActivityLog {
   createdAt   DateTime   @default(now())
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt])
   @@index([userId])
   @@index([relatedType, relatedId])
 }

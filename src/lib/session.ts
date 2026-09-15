@@ -1,4 +1,5 @@
 import { cookies } from "next/headers"
+import { cache } from "react"
 import { db } from "./db"
 
 const SESSION_COOKIE_NAME = "novaflow_session"
@@ -68,7 +69,8 @@ export async function clearSession() {
   cookieStore.delete(SESSION_COOKIE_NAME)
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+// React cache() eliminates duplicate session queries across layout and page components within the same request
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   try {
     const cookieStore = await cookies()
     const userId = cookieStore.get(SESSION_COOKIE_NAME)?.value
@@ -77,13 +79,34 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       return null
     }
 
+    // Fetch user and primary workspace membership in a single roundtrip
     const user = await db.user.findUnique({
       where: { id: userId },
+      include: {
+        workspaceMembers: {
+          include: { workspace: true },
+          orderBy: { createdAt: "asc" },
+          take: 1,
+        },
+      },
     })
 
     if (!user) return null
 
-    const ws = await ensureUserWorkspace(user.id, user.name)
+    let workspaceId = ""
+    let workspaceName = "Workspace"
+    let workspaceRole = "OWNER"
+
+    if (user.workspaceMembers && user.workspaceMembers.length > 0) {
+      workspaceId = user.workspaceMembers[0].workspaceId
+      workspaceName = user.workspaceMembers[0].workspace.name
+      workspaceRole = user.workspaceMembers[0].role
+    } else {
+      const ws = await ensureUserWorkspace(user.id, user.name)
+      workspaceId = ws.workspaceId
+      workspaceName = ws.workspaceName
+      workspaceRole = ws.workspaceRole
+    }
 
     return {
       id: user.id,
@@ -92,9 +115,9 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       role: (user as any).role || "MEMBER",
       title: (user as any).title || null,
       avatarUrl: (user as any).avatarUrl || null,
-      workspaceId: ws.workspaceId,
-      workspaceName: ws.workspaceName,
-      workspaceRole: ws.workspaceRole,
+      workspaceId,
+      workspaceName,
+      workspaceRole,
     }
   } catch (err: any) {
     if (err?.digest === "DYNAMIC_SERVER_USAGE" || err?.message?.includes("Dynamic server usage")) {
@@ -103,7 +126,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     console.error("Failed to get current user session:", err)
     return null
   }
-}
+})
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser()
