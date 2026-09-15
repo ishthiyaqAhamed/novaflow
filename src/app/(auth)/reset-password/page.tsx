@@ -1,10 +1,10 @@
 "use client"
 
-import { useActionState, Suspense } from "react"
+import { useState, useActionState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { resetPassword } from "./actions"
-import { KeyRound, ArrowLeft, Lock } from "lucide-react"
+import { KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react"
 
 const initialState = { error: "" }
 
@@ -12,6 +12,8 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const initialEmail = searchParams.get("email") || ""
   const [state, formAction, pending] = useActionState(resetPassword, initialState)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   return (
     <div className="w-full max-w-sm">
@@ -68,30 +70,50 @@ function ResetPasswordForm() {
           <label className="block text-xs font-medium text-ink mb-1.5" htmlFor="newPassword">
             New Password
           </label>
-          <input
-            id="newPassword"
-            name="newPassword"
-            type="password"
-            placeholder="At least 8 characters"
-            required
-            minLength={8}
-            className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
-          />
+          <div className="relative">
+            <input
+              id="newPassword"
+              name="newPassword"
+              type={showPassword ? "text" : "password"}
+              placeholder="At least 8 characters"
+              required
+              minLength={8}
+              className="w-full rounded-lg border border-border bg-paper pl-3 pr-9 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors p-0.5 rounded"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         <div>
           <label className="block text-xs font-medium text-ink mb-1.5" htmlFor="confirmPassword">
             Confirm New Password
           </label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            placeholder="Re-type password"
-            required
-            minLength={8}
-            className="w-full rounded-lg border border-border bg-paper px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Re-type password"
+              required
+              minLength={8}
+              className="w-full rounded-lg border border-border bg-paper pl-3 pr-9 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors p-0.5 rounded"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         {state?.error && (
